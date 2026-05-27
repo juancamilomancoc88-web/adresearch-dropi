@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AdResearch Dropi</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f5;
+    --text2: #9090a8;
+    --text3: #5a5a72;
+    --accent: #7c6af7;
+    --accent2: #5b4dd4;
+    --green: #22c87a;
+    --green-bg: rgba(34,200,122,0.1);
+    --yellow: #f5a623;
+    --yellow-bg: rgba(245,166,35,0.1);
+    --red: #f25c5c;
+    --red-bg: rgba(242,92,92,0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+  .app {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+  .logo-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-name { font-size: 15px; font-weight: 600; letter-spacing: -0.02em; }
+  .logo-sub { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+  }
+  input, select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text3); }
+  select option { background: var(--surface2); }
+  .token-row { display: flex; gap: 8px; }
+  .token-row input { flex: 1; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Sora', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-full {
+    width: 100%;
+    padding: 13px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 0.5rem;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
+    margin-top: 0.75rem;
+  }
+  .btn-ghost:hover { background: var(--surface2); }
+  .secure-note {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: rgba(124,106,247,0.05); }
+  .upload-icon { font-size: 32px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 14px; color: var(--text2); }
+  .upload-zone span { color: var(--accent); }
+  #preview-wrap { display: none; text-align: center; margin-top: 1rem; }
+  #preview-wrap img { max-height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+  #preview-wrap p { font-size: 12px; color: var(--text3); margin-top: 6px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .full-col { margin-top: 8px; }
+  .loader { display: none; text-align: center; padding: 3rem 1rem; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader p { font-size: 14px; color: var(--text2); font-family: 'DM Mono', monospace; }
+  .results { display: none; }
+  .verdict {
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+  }
+  .verdict-green { background: var(--green-bg); border-color: rgba(34,200,122,0.3); }
+  .verdict-yellow { background: var(--yellow-bg); border-color: rgba(245,166,35,0.3); }
+  .verdict-red { background: var(--red-bg); border-color: rgba(242,92,92,0.3); }
+  .verdict-icon { font-size: 24px; margin-bottom: 6px; }
+  .verdict-title { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+  .verdict-green .verdict-title { color: var(--green); }
+  .verdict-yellow .verdict-title { color: var(--yellow); }
+  .verdict-red .verdict-title { color: var(--red); }
+  .verdict-sub { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    text-align: center;
+  }
+  .metric-val { font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .metric-lbl { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .metric-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .section { margin-bottom: 1rem; }
+  .section-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .comp-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .comp-row:last-child { border-bottom: none; }
+  .comp-name { color: var(--text); font-weight: 500; }
+  .comp-info { color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .badge-hot { background: var(--yellow-bg); color: var(--yellow); }
+  .badge-ok { background: var(--green-bg); color: var(--green); }
+  .badge-new { background: var(--surface2); color: var(--text3); }
+  .link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .link-row:last-child { border-bottom: none; }
+  .link-row a { color: var(--accent); text-decoration: none; word-break: break-all; }
+  .link-row a:hover { text-decoration: underline; }
+  .angle-box {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    border-left: 3px solid var(--accent);
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .price-chip {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .chip-ok { background: var(--green-bg); color: var(--green); }
+  .chip-warn { background: var(--yellow-bg); color: var(--yellow); }
+  .chip-bad { background: var(--red-bg); color: var(--red); }
+  .body-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+  .country-tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text2);
+  }
+  .error-box {
+    background: var(--red-bg);
+    border: 1px solid rgba(242,92,92,0.3);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    color: var(--red);
+    display: none;
+    margin-bottom: 1rem;
+  }
+  .success-box {
+    background: var(--green-bg);
+    border: 1px solid rgba(34,200,122,0.3);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 14px;
+    color: var(--green);
+    display: none;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 480px) {
+    .app { padding: 1.25rem 0.75rem 3rem; }
+    .metrics { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .metric { padding: 0.75rem 0.5rem; }
+    .metric-val { font-size: 22px; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="logo-bar">
+    <div class="logo-icon">🔍</div>
+    <div>
+      <div class="logo-name">AdResearch Dropi</div>
+      <div class="logo-sub">meta ad library analyzer</div>
+    </div>
+  </div>
+
+  <div id="error-box" class="error-box"></div>
+  <div id="success-box" class="success-box"></div>
+
+  <div id="setup-section">
+    <div class="card">
+      <div class="label">🔑 App Token de Meta</div>
+      <div class="token-row">
+        <input type="password" id="token-input" placeholder="AppID|AppSecret" />
+        <button class="btn" onclick="saveToken()">Guardar</button>
+      </div>
+      <div class="secure-note">🔒 Solo se guarda en tu dispositivo, nunca en servidores externos</div>
+    </div>
+
+    <div class="card">
+      <div class="label">📦 Producto a analizar</div>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📷</div>
+        <p>Toca para subir la captura del producto<br><span>desde Dropi o cualquier fuente</span></p>
+      </div>
+      <input type="file" id="file-input" accept="image/*" capture="environment" style="display:none" onchange="handleFile(event)" />
+      <div id="preview-wrap">
+        <img id="preview-img" src="" alt="Vista previa" />
+        <p>✓ Imagen cargada</p>
+      </div>
+      <div class="two-col">
+        <input type="text" id="product-name" placeholder="Nombre del producto" />
+        <input type="number" id="product-price" placeholder="Precio sugerido" />
+      </div>
+      <div class="full-col">
+        <select id="country-select">
+          <option value="CR">🇨🇷 Costa Rica</option>
+          <option value="GT">🇬🇹 Guatemala</option>
+          <option value="CO">🇨🇴 Colombia</option>
+          <option value="MX">🇲🇽 México</option>
+          <option value="PA">🇵🇦 Panamá</option>
+          <option value="ALL">🌎 Todos (LATAM)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-full" id="analyze-btn" onclick="analyzeProduct()">
+      🔎 Analizar competencia
+    </button>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p id="loader-text">Buscando anuncios activos...</p>
+  </div>
+
+  <div class="results" id="results">
+    <div id="verdict" class="verdict">
+      <div class="verdict-icon" id="verdict-icon"></div>
+      <div class="verdict-title" id="verdict-title"></div>
+      <div class="verdict-sub" id="verdict-sub"></div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-val" id="m1">—</div>
+        <div class="metric-lbl">competidores</div>
+        <div class="metric-sub" id="m1s"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" id="m2">—</div>
+        <div class="metric-lbl">días máx</div>
+        <div class="metric-sub" id="m2s"></div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" id="m3">—</div>
+        <div class="metric-lbl">precio</div>
+        <div class="metric-sub" id="m3s"></div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">👥 Competidores activos</div>
+      <div id="comp-list"></div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">🔗 Landing pages encontradas</div>
+      <div id="links-list"></div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">💡 Ángulo de venta diferente</div>
+      <div class="angle-box" id="angle-text"></div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">💰 Análisis de precio</div>
+      <div class="body-text" id="price-text"></div>
+      <div class="price-row">
+        <span class="price-chip" id="price-chip"></span>
+        <span class="body-text" id="price-range" style="font-size:13px;"></span>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">🌍 Países donde se pauta</div>
+      <div class="tags" id="countries-list"></div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">📈 Tendencia</div>
+      <div class="body-text" id="trend-text"></div>
+      <div class="tags" id="trend-tags"></div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">📊 Datos adicionales</div>
+      <div class="body-text" id="extra-text"></div>
+    </div>
+
+    <button class="btn btn-ghost" onclick="resetTool()">↺ Analizar otro producto</button>
+  </div>
+</div>
+
+<script>
+let appToken = localStorage.getItem('meta_token') || '';
+let imgBase64 = '';
+
+if (appToken) {
+  document.getElementById('token-input').value = '••••••••••••••••';
+  document.getElementById('token-input').disabled = true;
+  showSuccess('Token cargado desde sesión anterior ✓');
+}
+
+function saveToken() {
+  const v = document.getElementById('token-input').value.trim();
+  if (!v || v.startsWith('•')) return showError('Pega tu App Token primero.');
+  appToken = v;
+  localStorage.setItem('meta_token', v);
+  document.getElementById('token-input').value = '••••••••••••••••';
+  document.getElementById('token-input').disabled = true;
+  showSuccess('Token guardado ✓');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('success-box');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    imgBase64 = ev.target.result.split(',')[1];
+    document.getElementById('preview-img').src = ev.target.result;
+    document.getElementById('preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+const loaderMessages = [
+  'Identificando el producto...',
+  'Buscando anuncios en Meta Ad Library...',
+  'Analizando competidores activos...',
+  'Calculando días de pauta...',
+  'Evaluando precios del mercado...',
+  'Generando reporte final...'
+];
+
+async function analyzeProduct() {
+  if (!appToken) return showError('Guarda tu App Token primero.');
+  if (!imgBase64) return showError('Sube una imagen del producto primero.');
+
+  const name = document.getElementById('product-name').value.trim();
+  const price = document.getElementById('product-price').value.trim();
+  const country = document.getElementById('country-select').value;
+  const countryNames = { CR:'Costa Rica', GT:'Guatemala', CO:'Colombia', MX:'México', PA:'Panamá', ALL:'Latinoamérica' };
+
+  document.getElementById('setup-section').style.display = 'none';
+  document.getElementById('loader').style.display = 'block';
+
+  let step = 0;
+  const interval = setInterval(() => {
+    if (step < loaderMessages.length) document.getElementById('loader-text').textContent = loaderMessages[step++];
+  }, 2500);
+
+  try {
+    const countriesParam = country === 'ALL' ? '"CR","GT","CO","MX","PA"' : `"${country}"`;
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Eres un experto en análisis competitivo de dropshipping para Latinoamérica. Analiza productos de Dropi evaluando la competencia en Meta Ad Library.
+
+CRITERIOS para el veredicto:
+- TESTEAR: menos de 5 competidores activos Y al menos uno lleva 7+ días pautando
+- PRECAUCION: 5-8 competidores O competidores con menos de 7 días
+- NO_TESTEAR: más de 8 competidores O producto completamente saturado
+
+Responde SOLO con JSON válido sin backticks:
+{
+  "product_identified": "string",
+  "verdict": "TESTEAR|PRECAUCION|NO_TESTEAR",
+  "verdict_reason": "string",
+  "competitors_count": number,
+  "max_days_active": number,
+  "competitors": [{"name":"string","days_active":number,"url":"string"}],
+  "landing_links": ["url"],
+  "angle_suggestion": "string",
+  "price_assessment": "COMPETITIVO|ALTO|BAJO",
+  "price_analysis": "string",
+  "price_range": "string",
+  "countries_active": ["CC"],
+  "trend_analysis": "string",
+  "trend_tags": ["string"],
+  "extra_insights": "string"
+}`,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imgBase64 } },
+            { type: 'text', text: `Analiza este producto para ${countryNames[country]}.
+Token Meta: ${appToken}
+${name ? 'Nombre: ' + name : ''}
+${price ? 'Precio Dropi: ' + price : ''}
+
+Usa Ad Library API: https://graph.facebook.com/v19.0/ads_archive?access_token=${appToken}&ad_type=ALL&ad_reached_countries=[${countriesParam}]&search_terms=PRODUCTO&fields=id,ad_creation_time,ad_delivery_start_time,page_name,ad_snapshot_url&limit=25
+
+Si la API falla, usa tu conocimiento del mercado LATAM. Genera siempre el JSON completo.` }
+          ]
+        }],
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }]
+      })
+    });
+
+    clearInterval(interval);
+    const data = await resp.json();
+    let raw = '';
+    for (const b of data.content) if (b.type === 'text') raw += b.text;
+    const match = raw.replace(/```json|```/g,'').trim();
+    let result;
+    try { result = JSON.parse(match); }
+    catch(e) { const m = match.match(/\{[\s\S]*\}/); result = JSON.parse(m[0]); }
+    render(result);
+  } catch(err) {
+    clearInterval(interval);
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('setup-section').style.display = 'block';
+    showError('Error: ' + err.message);
+  }
+}
+
+function render(r) {
+  document.getElementById('loader').style.display = 'none';
+
+  const vEl = document.getElementById('verdict');
+  vEl.className = 'verdict';
+  if (r.verdict === 'TESTEAR') {
+    vEl.classList.add('verdict-green');
+    document.getElementById('verdict-icon').textContent = '✅';
+    document.getElementById('verdict-title').textContent = 'Vale la pena testear: ' + (r.product_identified || '');
+  } else if (r.verdict === 'PRECAUCION') {
+    vEl.classList.add('verdict-yellow');
+    document.getElementById('verdict-icon').textContent = '⚠️';
+    document.getElementById('verdict-title').textContent = 'Testear con precaución: ' + (r.product_identified || '');
+  } else {
+    vEl.classList.add('verdict-red');
+    document.getElementById('verdict-icon').textContent = '🚫';
+    document.getElementById('verdict-title').textContent = 'No testear ahora: ' + (r.product_identified || '');
+  }
+  document.getElementById('verdict-sub').textContent = r.verdict_reason || '';
+
+  document.getElementById('m1').textContent = r.competitors_count ?? '—';
+  document.getElementById('m1s').textContent = r.competitors_count < 5 ? '✓ baja' : r.competitors_count < 9 ? '⚠ media' : '✗ alta';
+  document.getElementById('m2').textContent = r.max_days_active ?? '—';
+  document.getElementById('m2s').textContent = r.max_days_active >= 7 ? '✓ ganador' : r.max_days_active >= 3 ? '⚠ reciente' : '✗ nuevo';
+  document.getElementById('m3').textContent = r.price_assessment === 'COMPETITIVO' ? '✓' : r.price_assessment === 'ALTO' ? '↑' : '↓';
+  document.getElementById('m3s').textContent = r.price_assessment || '—';
+
+  const compList = document.getElementById('comp-list');
+  compList.innerHTML = '';
+  (r.competitors || []).forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'comp-row';
+    const cls = c.days_active >= 7 ? 'badge-hot' : c.days_active >= 3 ? 'badge-ok' : 'badge-new';
+    const lbl = c.days_active >= 7 ? '🔥 ganador' : c.days_active >= 3 ? '✓ activo' : 'nuevo';
+    d.innerHTML = `<span class="comp-name">${c.name||'Tienda'}</span><span class="comp-info">${c.days_active||'?'}d <span class="badge ${cls}">${lbl}</span></span>`;
+    compList.appendChild(d);
+  });
+  if (!r.competitors?.length) compList.innerHTML = '<div class="body-text" style="padding:8px 0;">No se encontraron competidores activos — señal positiva</div>';
+
+  const linksList = document.getElementById('links-list');
+  linksList.innerHTML = '';
+  (r.landing_links || []).forEach(url => {
+    const d = document.createElement('div');
+    d.className = 'link-row';
+    d.innerHTML = `🔗 <a href="${url}" target="_blank">${url}</a>`;
+    linksList.appendChild(d);
+  });
+  if (!r.landing_links?.length) linksList.innerHTML = '<div class="body-text" style="padding:8px 0;">No se encontraron landing pages específicas</div>';
+
+  document.getElementById('angle-text').textContent = r.angle_suggestion || '—';
+  document.getElementById('price-text').textContent = r.price_analysis || '';
+
+  const pc = document.getElementById('price-chip');
+  pc.textContent = r.price_assessment || '—';
+  pc.className = 'price-chip ' + (r.price_assessment === 'COMPETITIVO' ? 'chip-ok' : r.price_assessment === 'ALTO' ? 'chip-warn' : 'chip-bad');
+  document.getElementById('price-range').textContent = r.price_range ? 'Rango: ' + r.price_range : '';
+
+  const countries = { CR:'🇨🇷 Costa Rica', GT:'🇬🇹 Guatemala', CO:'🇨🇴 Colombia', MX:'🇲🇽 México', PA:'🇵🇦 Panamá', US:'🇺🇸 EE.UU', PE:'🇵🇪 Perú', CL:'🇨🇱 Chile' };
+  const cl = document.getElementById('countries-list');
+  cl.innerHTML = '';
+  (r.countries_active || []).forEach(c => {
+    const t = document.createElement('span');
+    t.className = 'country-tag';
+    t.textContent = countries[c] || c;
+    cl.appendChild(t);
+  });
+
+  document.getElementById('trend-text').textContent = r.trend_analysis || '';
+  const tt = document.getElementById('trend-tags');
+  tt.innerHTML = '';
+  (r.trend_tags || []).forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'tag'; s.textContent = t;
+    tt.appendChild(s);
+  });
+
+  document.getElementById('extra-text').textContent = r.extra_insights || '';
+  document.getElementById('results').style.display = 'block';
+}
+
+function resetTool() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('setup-section').style.display = 'block';
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('product-name').value = '';
+  document.getElementById('product-price').value = '';
+  imgBase64 = '';
+}
+</script>
+</body>
+</html>
